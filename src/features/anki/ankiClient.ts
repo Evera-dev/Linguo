@@ -3,6 +3,7 @@ import type {
   AnkiCanAddResult,
   AnkiConnectResponse,
   AnkiNote,
+  ImportCardsOptions,
   ImportFailure,
   ImportFailureKind,
   ImportResult,
@@ -139,7 +140,11 @@ const createFailure = (card: ParsedCard, cardNumber: number, reason: string): Im
   kind: classifyFailure(reason),
 })
 
-export const importCards = async (cards: ParsedCard[], deckName: string): Promise<ImportResult> => {
+export const importCards = async (
+  cards: ParsedCard[],
+  deckName: string,
+  options: ImportCardsOptions = {},
+): Promise<ImportResult> => {
   if (!deckName) throw new Error('Select a deck before importing.')
   if (cards.length === 0) throw new Error('There are no cards to import.')
 
@@ -149,6 +154,7 @@ export const importCards = async (cards: ParsedCard[], deckName: string): Promis
   const notes = cards.map((card) => cardToAnkiNote(card, deckName))
   let eligibleIndexes = cards.map((_, index) => index)
   const failures: ImportFailure[] = []
+  options.onProgress?.({ phase: 'validating', current: 0, total: cards.length })
 
   try {
     const checks = await invoke<AnkiCanAddResult[]>('canAddNotesWithErrorDetail', undefined, { notes })
@@ -165,6 +171,22 @@ export const importCards = async (cards: ParsedCard[], deckName: string): Promis
   }
 
   if (eligibleIndexes.length > 0) {
+    if (options.createAudio) {
+      for (const [progressIndex, cardIndex] of eligibleIndexes.entries()) {
+        const audio = await options.createAudio(cards[cardIndex])
+        notes[cardIndex] = {
+          ...notes[cardIndex],
+          audio: { ...audio, fields: ['Front'] },
+        }
+        options.onProgress?.({
+          phase: 'generating-audio',
+          current: progressIndex + 1,
+          total: eligibleIndexes.length,
+        })
+      }
+    }
+
+    options.onProgress?.({ phase: 'sending', current: 0, total: eligibleIndexes.length })
     const eligibleNotes = eligibleIndexes.map((index) => notes[index])
     const addedNoteIds = await invoke<Array<number | null>>('addNotes', undefined, {
       notes: eligibleNotes,

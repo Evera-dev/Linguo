@@ -16,6 +16,13 @@ export interface AnkiNote {
     allowDuplicate: false
   }
   tags: string[]
+  audio?: AnkiAudio
+}
+
+export interface AnkiAudio {
+  filename: string
+  data: string
+  fields: ['Front']
 }
 
 export interface AnkiCanAddResult {
@@ -40,3 +47,20 @@ export interface ImportResult {
   failures: ImportFailure[]
 }
 
+export type ImportPhase = 'validating' | 'generating-audio' | 'sending'
+
+export interface ImportProgress {
+  phase: ImportPhase
+  current: number
+  total: number
+}
+
+export interface GeneratedAudio {
+  filename: string
+  data: string
+}
+
+export interface ImportCardsOptions {
+  createAudio?: (card: ParsedCard) => Promise<GeneratedAudio>
+  onProgress?: (progress: ImportProgress) => void
+}
