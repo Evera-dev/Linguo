@@ -10,15 +10,21 @@ export function ImportSummary({ result, error, onDismiss }: ImportSummaryProps) 
   if (!result && !error) return null
 
   const isSuccess = result?.failed === 0
+  const syncFailed = result?.syncStatus === 'failed'
+  const hasWarning = Boolean(error || !isSuccess || syncFailed)
   const title = error
     ? 'Import could not be completed'
+    : syncFailed
+      ? 'Cards added, but sync failed'
     : isSuccess
-      ? 'Cards sent to Anki'
+      ? result.syncStatus === 'synced'
+        ? 'Cards added and synced'
+        : 'Cards sent to Anki'
       : 'Import completed with some issues'
 
   return (
-    <section className={`import-summary ${error || !isSuccess ? 'import-summary--warning' : ''}`} aria-live="polite">
-      <span className="summary-icon" aria-hidden="true">{error || !isSuccess ? '!' : '✓'}</span>
+    <section className={`import-summary ${hasWarning ? 'import-summary--warning' : ''}`} aria-live="polite">
+      <span className="summary-icon" aria-hidden="true">{hasWarning ? '!' : '✓'}</span>
       <div className="summary-content">
         <h2>{title}</h2>
         {error && <p>{error}</p>}
@@ -28,6 +34,8 @@ export function ImportSummary({ result, error, onDismiss }: ImportSummaryProps) 
               <strong>{result.added}</strong> added · <strong>{result.failed}</strong> failed
               {result.duplicates > 0 && <> · <strong>{result.duplicates}</strong> duplicate{result.duplicates === 1 ? '' : 's'}</>}
             </p>
+            {result.syncStatus === 'synced' && <p>Your collection was synced with AnkiWeb.</p>}
+            {result.syncStatus === 'failed' && <p>{result.syncError}</p>}
             {result.failures.length > 0 && (
               <ul>
                 {result.failures.map((failure) => (

@@ -65,6 +65,10 @@ Keep the Piper terminal open while importing. Linguo connects through the local 
 
 Audio is generated only after Anki duplicate validation succeeds. The resulting WAV is sent inside `addNotes`, attached to `Front`, and stored in Anki's media collection.
 
+## AnkiWeb sync
+
+After Anki confirms that every card in a batch was added, Linguo asks AnkiConnect to sync the collection with AnkiWeb. Partial or failed imports are not synced automatically. Anki owns the sync session and credentials; Linguo never stores AnkiWeb account information.
+
 ## Card format
 
 ```text
@@ -84,4 +88,4 @@ Back: Resultó ser más fácil de lo esperado.
 
 ## Scope
 
-The MVP stores only the latest pasted text, selected deck, and post-import text preference in `localStorage`. It has no remote backend, accounts, cloud sync, OpenAI integration, or data collection. The selected Piper voice and audio toggle are session-only preferences.
+The MVP stores only the latest pasted text, selected deck, and post-import text preference in `localStorage`. It has no remote backend, accounts, OpenAI integration, or data collection. AnkiWeb synchronization is delegated entirely to the local Anki application through AnkiConnect. The selected Piper voice and audio toggle are session-only preferences.

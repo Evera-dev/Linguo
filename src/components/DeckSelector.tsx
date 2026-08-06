@@ -60,6 +60,7 @@ export function DeckSelector({
     }
     if (importProgress.phase === 'validating') return 'Checking cards…'
     if (importProgress.phase === 'sending') return 'Sending to Anki…'
+    if (importProgress.phase === 'syncing') return 'Syncing AnkiWeb…'
     return `Generating audio ${importProgress.current}/${importProgress.total}`
   })()
 

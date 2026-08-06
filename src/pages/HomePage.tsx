@@ -4,7 +4,12 @@ import { CardInput } from '../components/CardInput.tsx'
 import { CardPreviewList } from '../components/CardPreviewList.tsx'
 import { DeckSelector } from '../components/DeckSelector.tsx'
 import { ImportSummary } from '../components/ImportSummary.tsx'
-import { getAnkiErrorMessage, importCards } from '../features/anki/ankiClient.ts'
+import {
+  getAnkiErrorMessage,
+  getAnkiSyncErrorMessage,
+  importCards,
+  syncAnki,
+} from '../features/anki/ankiClient.ts'
 import type { ImportProgress, ImportResult } from '../features/anki/ankiTypes.ts'
 import { getPiperErrorMessage, PiperError, synthesizeWithPiper } from '../features/audio/piperClient.ts'
 import { parseCards } from '../features/cards/cardParser.ts'
@@ -84,8 +89,11 @@ export function HomePage() {
     !isImporting
 
   const headerMessage = (() => {
+    if (importResult?.syncStatus === 'synced') return 'Your cards were sent to Anki and synced.'
+    if (importResult?.syncStatus === 'failed') return 'Cards added, but AnkiWeb sync needs your attention.'
     if (importResult?.failed === 0) return 'Your cards were sent to Anki.'
     if (importResult && importResult.failed > 0) return 'Some cards need your attention.'
+    if (importProgress?.phase === 'syncing') return 'I’m syncing your collection with AnkiWeb…'
     if (importProgress?.phase === 'generating-audio') return 'I’m generating pronunciation audio…'
     if (isAnalyzing) return 'I’m reading your cards…'
     if (cards.length > 0 && invalidCardCount > 0) return 'Some cards need your attention.'
@@ -173,7 +181,21 @@ export function HomePage() {
         } : {}),
         onProgress: setImportProgress,
       })
-      setImportResult(result)
+      let completedResult = result
+      if (result.failed === 0) {
+        setImportProgress({ phase: 'syncing', current: result.added, total: result.added })
+        try {
+          await syncAnki()
+          completedResult = { ...result, syncStatus: 'synced' }
+        } catch (error) {
+          completedResult = {
+            ...result,
+            syncStatus: 'failed',
+            syncError: getAnkiSyncErrorMessage(error),
+          }
+        }
+      }
+      setImportResult(completedResult)
       if (result.failed === 0 && !keepTextAfterImport) {
         setInput('')
         storeValue(STORAGE_KEYS.input, '')

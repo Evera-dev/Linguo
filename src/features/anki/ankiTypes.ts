@@ -45,9 +45,11 @@ export interface ImportResult {
   failed: number
   duplicates: number
   failures: ImportFailure[]
+  syncStatus: 'not-attempted' | 'synced' | 'failed'
+  syncError?: string
 }
 
-export type ImportPhase = 'validating' | 'generating-audio' | 'sending'
+export type ImportPhase = 'validating' | 'generating-audio' | 'sending' | 'syncing'
 
 export interface ImportProgress {
   phase: ImportPhase

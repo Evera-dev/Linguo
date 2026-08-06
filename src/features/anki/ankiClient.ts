@@ -14,6 +14,7 @@ const ANKI_CONNECT_URL = 'http://127.0.0.1:8765'
 const ANKI_CONNECT_VERSION = 6
 const REQUEST_TIMEOUT_MS = 8_000
 const IMPORT_TIMEOUT_MS = 60_000
+const SYNC_TIMEOUT_MS = 120_000
 
 type ErrorKind = 'connection' | 'http' | 'response' | 'api'
 
@@ -96,6 +97,10 @@ export const getDeckNames = async (): Promise<string[]> => {
     throw new AnkiConnectError('response', 'AnkiConnect returned an invalid deck list.')
   }
   return [...decks].sort((left, right) => left.localeCompare(right))
+}
+
+export const syncAnki = async (): Promise<void> => {
+  await invoke<unknown>('sync', ANKI_CONNECT_VERSION, undefined, SYNC_TIMEOUT_MS)
 }
 
 const escapeHtml = (value: string): string =>
@@ -225,7 +230,23 @@ export const importCards = async (
     failed: failures.length,
     duplicates,
     failures: failures.sort((left, right) => left.cardNumber - right.cardNumber),
+    syncStatus: 'not-attempted',
   }
+}
+
+export const getAnkiSyncErrorMessage = (error: unknown): string => {
+  console.error('AnkiWeb sync error:', error)
+
+  if (error instanceof AnkiConnectError) {
+    if (error.kind === 'connection') {
+      return 'The cards were added, but AnkiWeb sync could not start. Check your connection and sync from Anki.'
+    }
+    if (error.kind === 'api') {
+      return `The cards were added, but AnkiWeb sync failed: ${error.message}`
+    }
+  }
+
+  return 'The cards were added, but AnkiWeb sync could not be completed. Try syncing from Anki.'
 }
 
 export const getAnkiErrorMessage = (error: unknown): string => {
