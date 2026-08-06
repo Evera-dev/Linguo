@@ -169,7 +169,7 @@ export function HomePage() {
         ...(includeAudio ? {
           createAudio: async (card: ParsedCard) => {
             try {
-              return await synthesizeWithPiper(card.front, selectedVoice)
+              return await synthesizeWithPiper(card.back, selectedVoice)
             } catch (error) {
               const cardNumber = cards.indexOf(card) + 1
               const message = getPiperErrorMessage(error)

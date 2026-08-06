@@ -22,7 +22,7 @@ export interface AnkiNote {
 export interface AnkiAudio {
   filename: string
   data: string
-  fields: ['Front']
+  fields: ['Back']
 }
 
 export interface AnkiCanAddResult {

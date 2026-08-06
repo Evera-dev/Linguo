@@ -73,7 +73,7 @@ export function AudioSettings({
           />
           <span>
             <strong>Include pronunciation audio</strong>
-            <small>Generate a local WAV for each Front with Piper.</small>
+            <small>Generate a local WAV from each Back and play it on the reverse.</small>
           </span>
         </label>
         <span className={`connection-pill connection-pill--${status}`} role="status">

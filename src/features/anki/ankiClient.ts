@@ -135,7 +135,7 @@ export const cardToAnkiNote = (card: ParsedCard, deckName: string): AnkiNote => 
 
 export const attachAudioToAnkiNote = (note: AnkiNote, audio: GeneratedAudio): AnkiNote => ({
   ...note,
-  audio: { ...audio, fields: ['Front'] },
+  audio: { ...audio, fields: ['Back'] },
 })
 
 const classifyFailure = (reason: string): ImportFailureKind => {

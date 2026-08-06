@@ -18,8 +18,9 @@ export const runAnkiAudioManualExamples = (): string[] => {
 
   if (note.audio?.filename !== 'linguo-example.wav') failures.push('audio filename was not attached')
   if (note.audio?.data !== 'UklGRg==') failures.push('base64 audio was not attached')
-  if (note.audio?.fields[0] !== 'Front') failures.push('audio was not mapped to Front')
+  if (note.audio?.fields[0] !== 'Back') failures.push('audio was not mapped to Back')
   if (note.fields.Front !== '&lt;Practice this&gt;') failures.push('Front HTML escaping changed')
+  if (note.fields.Back !== '<div>Practica esto</div>') failures.push('Back content changed')
 
   return failures
 }
