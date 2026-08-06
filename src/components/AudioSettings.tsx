@@ -2,9 +2,9 @@ import { useState } from 'react'
 import type { PiperConnectionStatus } from '../features/audio/piperTypes.ts'
 
 const SETUP_COMMANDS = [
-  'py -m pip install "piper-tts[http]"',
-  'py -m piper.download_voices en_US-lessac-medium',
-  'py -m piper.http_server -m en_US-lessac-medium --host 127.0.0.1 --port 5000',
+  'python -m pip install "piper-tts[http]"',
+  'python -m piper.download_voices en_US-lessac-medium',
+  'python -m piper.http_server -m en_US-lessac-medium --host 127.0.0.1 --port 5000',
 ] as const
 
 function SetupCommand({ command }: { command: string }) {
@@ -110,7 +110,13 @@ export function AudioSettings({
           ) : (
             <div className="piper-setup">
               {message && <p role="alert">{message}</p>}
-              <p>Run these commands in PowerShell, then retry the connection:</p>
+              <p>
+                First install Python 3.11 or 3.12 from{' '}
+                <a href="https://www.python.org/downloads/windows/" target="_blank" rel="noreferrer">
+                  python.org
+                </a>{' '}
+                and enable <strong>Add Python to PATH</strong>. Then run:
+              </p>
               <div className="setup-commands">
                 {SETUP_COMMANDS.map((command) => <SetupCommand command={command} key={command} />)}
               </div>

@@ -3,6 +3,7 @@ import type {
   AnkiCanAddResult,
   AnkiConnectResponse,
   AnkiNote,
+  GeneratedAudio,
   ImportCardsOptions,
   ImportFailure,
   ImportFailureKind,
@@ -12,6 +13,7 @@ import type {
 const ANKI_CONNECT_URL = 'http://127.0.0.1:8765'
 const ANKI_CONNECT_VERSION = 6
 const REQUEST_TIMEOUT_MS = 8_000
+const IMPORT_TIMEOUT_MS = 60_000
 
 type ErrorKind = 'connection' | 'http' | 'response' | 'api'
 
@@ -38,9 +40,10 @@ export async function invoke<T>(
   action: string,
   version = ANKI_CONNECT_VERSION,
   params?: Record<string, unknown>,
+  timeoutMs = REQUEST_TIMEOUT_MS,
 ): Promise<T> {
   const controller = new AbortController()
-  const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+  const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs)
 
   try {
     const response = await fetch(ANKI_CONNECT_URL, {
@@ -125,6 +128,11 @@ export const cardToAnkiNote = (card: ParsedCard, deckName: string): AnkiNote => 
   }
 }
 
+export const attachAudioToAnkiNote = (note: AnkiNote, audio: GeneratedAudio): AnkiNote => ({
+  ...note,
+  audio: { ...audio, fields: ['Front'] },
+})
+
 const classifyFailure = (reason: string): ImportFailureKind => {
   const normalizedReason = reason.toLowerCase()
   if (normalizedReason.includes('duplicate')) return 'duplicate'
@@ -172,12 +180,14 @@ export const importCards = async (
 
   if (eligibleIndexes.length > 0) {
     if (options.createAudio) {
+      options.onProgress?.({
+        phase: 'generating-audio',
+        current: 0,
+        total: eligibleIndexes.length,
+      })
       for (const [progressIndex, cardIndex] of eligibleIndexes.entries()) {
         const audio = await options.createAudio(cards[cardIndex])
-        notes[cardIndex] = {
-          ...notes[cardIndex],
-          audio: { ...audio, fields: ['Front'] },
-        }
+        notes[cardIndex] = attachAudioToAnkiNote(notes[cardIndex], audio)
         options.onProgress?.({
           phase: 'generating-audio',
           current: progressIndex + 1,
@@ -188,9 +198,12 @@ export const importCards = async (
 
     options.onProgress?.({ phase: 'sending', current: 0, total: eligibleIndexes.length })
     const eligibleNotes = eligibleIndexes.map((index) => notes[index])
-    const addedNoteIds = await invoke<Array<number | null>>('addNotes', undefined, {
-      notes: eligibleNotes,
-    })
+    const addedNoteIds = await invoke<Array<number | null>>(
+      'addNotes',
+      undefined,
+      { notes: eligibleNotes },
+      IMPORT_TIMEOUT_MS,
+    )
 
     if (!Array.isArray(addedNoteIds) || addedNoteIds.length !== eligibleNotes.length) {
       throw new AnkiConnectError('response', 'AnkiConnect returned an invalid import result.')
