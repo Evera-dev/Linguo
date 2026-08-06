@@ -1,0 +1,28 @@
+{
+  "anki": {
+    "connectUrl": "http://127.0.0.1:8765",
+    "startupTimeoutMs": 60000
+  },
+  "piper": {
+    "infoUrl": "http://127.0.0.1:5000/info",
+    "command": "python",
+    "args": [
+      "-m",
+      "piper.http_server",
+      "-m",
+      "en_US-lessac-medium",
+      "--data-dir",
+      ".linguo/piper",
+      "--download-dir",
+      ".linguo/piper",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "5000"
+    ],
+    "startupTimeoutMs": 60000
+  },
+  "devServer": {
+    "startupTimeoutMs": 60000
+  }
+}

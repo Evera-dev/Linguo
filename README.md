@@ -16,6 +16,28 @@ pnpm install
 pnpm dev
 ```
 
+## Development CLI
+
+The `linguo` command starts Anki, waits for AnkiConnect, starts or reuses Piper, detects the project's development script, waits for its real local URL, and opens the browser.
+
+Build and register the command once:
+
+```powershell
+pnpm install
+pnpm build:cli
+pnpm link --global
+```
+
+It can then be run from any directory:
+
+```powershell
+linguo
+```
+
+Use `linguo --debug` to include child-process output and technical error details. CTRL+C stops the development server and Piper only when the CLI started it; Anki remains open.
+
+Runtime settings are in `linguo.config.json`. Update `piper.command` and `piper.args` if your Python executable, voice, or Piper port differs. Anki is discovered from `LINGUO_ANKI_PATH`, `PATH`, or common installation locations; an explicit `anki.executablePath` can also be added to the configuration.
+
 Available verification commands:
 
 ```bash
@@ -29,12 +51,12 @@ Framework-free manual checks live next to the parser, Piper client, and Anki aud
 
 Linguo can generate a WAV pronunciation of each card's `Front` with Piper. Audio generation is completely local and optional; text-only imports continue to work without Piper.
 
-Install Python 3.11 or 3.12 from [python.org](https://www.python.org/downloads/windows/) and enable **Add Python to PATH**. Then install Piper and an English voice from PowerShell:
+Install a current Python 3 release from [python.org](https://www.python.org/downloads/windows/) and enable **Add Python to PATH**. Then install Piper and an English voice from PowerShell:
 
 ```powershell
 python -m pip install "piper-tts[http]"
-python -m piper.download_voices en_US-lessac-medium
-python -m piper.http_server -m en_US-lessac-medium --host 127.0.0.1 --port 5000
+python -m piper.download_voices --download-dir .linguo/piper en_US-lessac-medium
+python -m piper.http_server -m en_US-lessac-medium --data-dir .linguo/piper --download-dir .linguo/piper --host 127.0.0.1 --port 5000
 ```
 
 On macOS or Linux, use `python3` instead of `python`. You can download other [supported Piper voices](https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/VOICES.md); review the license included with each voice model.

@@ -3,8 +3,8 @@ import type { PiperConnectionStatus } from '../features/audio/piperTypes.ts'
 
 const SETUP_COMMANDS = [
   'python -m pip install "piper-tts[http]"',
-  'python -m piper.download_voices en_US-lessac-medium',
-  'python -m piper.http_server -m en_US-lessac-medium --host 127.0.0.1 --port 5000',
+  'python -m piper.download_voices --download-dir .linguo/piper en_US-lessac-medium',
+  'python -m piper.http_server -m en_US-lessac-medium --data-dir .linguo/piper --download-dir .linguo/piper --host 127.0.0.1 --port 5000',
 ] as const
 
 function SetupCommand({ command }: { command: string }) {

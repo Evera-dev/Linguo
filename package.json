@@ -3,11 +3,17 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "bin": {
+    "linguo": "./dist-cli/linguo-cli.js"
+  },
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && pnpm build:cli && vite build",
+    "build:cli": "tsc -p tsconfig.cli.json",
+    "typecheck": "tsc -b && tsc -p tsconfig.cli.json --noEmit",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "linguo": "node ./dist-cli/linguo-cli.js"
   },
   "dependencies": {
     "react": "^19.2.8",
