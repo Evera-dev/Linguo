@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { AnkiAudioField } from '../features/anki/ankiTypes.ts'
 import type { PiperConnectionStatus } from '../features/audio/piperTypes.ts'
 
 const SETUP_COMMANDS = [
@@ -32,6 +33,7 @@ function SetupCommand({ command }: { command: string }) {
 
 interface AudioSettingsProps {
   includeAudio: boolean
+  audioField: AnkiAudioField
   status: PiperConnectionStatus
   message: string | null
   voices: string[]
@@ -39,12 +41,14 @@ interface AudioSettingsProps {
   isRefreshing: boolean
   isImporting: boolean
   onIncludeAudioChange: (include: boolean) => void
+  onAudioFieldChange: (field: AnkiAudioField) => void
   onVoiceChange: (voice: string) => void
   onRefresh: () => void
 }
 
 export function AudioSettings({
   includeAudio,
+  audioField,
   status,
   message,
   voices,
@@ -52,6 +56,7 @@ export function AudioSettings({
   isRefreshing,
   isImporting,
   onIncludeAudioChange,
+  onAudioFieldChange,
   onVoiceChange,
   onRefresh,
 }: AudioSettingsProps) {
@@ -73,7 +78,7 @@ export function AudioSettings({
           />
           <span>
             <strong>Include pronunciation audio</strong>
-            <small>Generate a local WAV from each Back and play it on the reverse.</small>
+            <small>Generate a local WAV from the selected side and play it on that side.</small>
           </span>
         </label>
         <span className={`connection-pill connection-pill--${status}`} role="status">
@@ -86,6 +91,18 @@ export function AudioSettings({
         <div className="audio-settings-body">
           {status === 'connected' ? (
             <div className="voice-controls">
+              <div className="deck-field">
+                <label htmlFor="audio-field">Card side to pronounce</label>
+                <select
+                  id="audio-field"
+                  value={audioField}
+                  onChange={(event) => onAudioFieldChange(event.target.value as AnkiAudioField)}
+                  disabled={isRefreshing || isImporting}
+                >
+                  <option value="Front">Front</option>
+                  <option value="Back">Reverse</option>
+                </select>
+              </div>
               <div className="deck-field">
                 <label htmlFor="piper-voice">Piper voice for this batch</label>
                 <select

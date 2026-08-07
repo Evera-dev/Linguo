@@ -2,6 +2,7 @@ import type { ParsedCard } from '../cards/cardTypes.ts'
 import type {
   AnkiCanAddResult,
   AnkiConnectResponse,
+  AnkiAudioField,
   AnkiNote,
   GeneratedAudio,
   ImportCardsOptions,
@@ -133,9 +134,13 @@ export const cardToAnkiNote = (card: ParsedCard, deckName: string): AnkiNote => 
   }
 }
 
-export const attachAudioToAnkiNote = (note: AnkiNote, audio: GeneratedAudio): AnkiNote => ({
+export const attachAudioToAnkiNote = (
+  note: AnkiNote,
+  audio: GeneratedAudio,
+  field: AnkiAudioField = 'Back',
+): AnkiNote => ({
   ...note,
-  audio: { ...audio, fields: ['Back'] },
+  audio: { ...audio, fields: [field] },
 })
 
 const classifyFailure = (reason: string): ImportFailureKind => {
@@ -192,7 +197,7 @@ export const importCards = async (
       })
       for (const [progressIndex, cardIndex] of eligibleIndexes.entries()) {
         const audio = await options.createAudio(cards[cardIndex])
-        notes[cardIndex] = attachAudioToAnkiNote(notes[cardIndex], audio)
+        notes[cardIndex] = attachAudioToAnkiNote(notes[cardIndex], audio, options.audioField)
         options.onProgress?.({
           phase: 'generating-audio',
           current: progressIndex + 1,

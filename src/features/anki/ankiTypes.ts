@@ -19,10 +19,12 @@ export interface AnkiNote {
   audio?: AnkiAudio
 }
 
+export type AnkiAudioField = 'Front' | 'Back'
+
 export interface AnkiAudio {
   filename: string
   data: string
-  fields: ['Back']
+  fields: [AnkiAudioField]
 }
 
 export interface AnkiCanAddResult {
@@ -64,5 +66,6 @@ export interface GeneratedAudio {
 
 export interface ImportCardsOptions {
   createAudio?: (card: ParsedCard) => Promise<GeneratedAudio>
+  audioField?: AnkiAudioField
   onProgress?: (progress: ImportProgress) => void
 }

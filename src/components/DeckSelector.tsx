@@ -1,5 +1,5 @@
 import type { PiperConnectionStatus } from '../features/audio/piperTypes.ts'
-import type { ImportProgress } from '../features/anki/ankiTypes.ts'
+import type { AnkiAudioField, ImportProgress } from '../features/anki/ankiTypes.ts'
 import type { ConnectionStatus } from '../hooks/useAnkiConnection.ts'
 import { AudioSettings } from './AudioSettings.tsx'
 
@@ -14,6 +14,7 @@ interface DeckSelectorProps {
   canImport: boolean
   keepTextAfterImport: boolean
   includeAudio: boolean
+  audioField: AnkiAudioField
   piperStatus: PiperConnectionStatus
   piperMessage: string | null
   piperVoices: string[]
@@ -25,6 +26,7 @@ interface DeckSelectorProps {
   onImport: () => void
   onKeepTextChange: (keep: boolean) => void
   onIncludeAudioChange: (include: boolean) => void
+  onAudioFieldChange: (field: AnkiAudioField) => void
   onVoiceChange: (voice: string) => void
   onPiperRefresh: () => void
 }
@@ -40,6 +42,7 @@ export function DeckSelector({
   canImport,
   keepTextAfterImport,
   includeAudio,
+  audioField,
   piperStatus,
   piperMessage,
   piperVoices,
@@ -51,6 +54,7 @@ export function DeckSelector({
   onImport,
   onKeepTextChange,
   onIncludeAudioChange,
+  onAudioFieldChange,
   onVoiceChange,
   onPiperRefresh,
 }: DeckSelectorProps) {
@@ -82,6 +86,7 @@ export function DeckSelector({
 
       <AudioSettings
         includeAudio={includeAudio}
+        audioField={audioField}
         status={piperStatus}
         message={piperMessage}
         voices={piperVoices}
@@ -89,6 +94,7 @@ export function DeckSelector({
         isRefreshing={isPiperRefreshing}
         isImporting={isImporting}
         onIncludeAudioChange={onIncludeAudioChange}
+        onAudioFieldChange={onAudioFieldChange}
         onVoiceChange={onVoiceChange}
         onRefresh={onPiperRefresh}
       />

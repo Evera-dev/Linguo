@@ -10,7 +10,7 @@ import {
   importCards,
   syncAnki,
 } from '../features/anki/ankiClient.ts'
-import type { ImportProgress, ImportResult } from '../features/anki/ankiTypes.ts'
+import type { AnkiAudioField, ImportProgress, ImportResult } from '../features/anki/ankiTypes.ts'
 import { getPiperErrorMessage, PiperError, synthesizeWithPiper } from '../features/audio/piperClient.ts'
 import { parseCards } from '../features/cards/cardParser.ts'
 import type { ParsedCard } from '../features/cards/cardTypes.ts'
@@ -57,6 +57,7 @@ export function HomePage() {
   )
   const [isImporting, setIsImporting] = useState(false)
   const [includeAudio, setIncludeAudio] = useState(false)
+  const [audioField, setAudioField] = useState<AnkiAudioField>('Back')
   const [voicePreference, setVoicePreference] = useState('')
   const [importProgress, setImportProgress] = useState<ImportProgress | null>(null)
   const [importResult, setImportResult] = useState<ImportResult | null>(null)
@@ -158,6 +159,11 @@ export function HomePage() {
     resetImportFeedback()
   }
 
+  const handleAudioFieldChange = (field: AnkiAudioField) => {
+    setAudioField(field)
+    resetImportFeedback()
+  }
+
   const handleImport = async () => {
     if (!canImport) return
     setIsImporting(true)
@@ -169,7 +175,8 @@ export function HomePage() {
         ...(includeAudio ? {
           createAudio: async (card: ParsedCard) => {
             try {
-              return await synthesizeWithPiper(card.back, selectedVoice)
+              const text = audioField === 'Front' ? card.front : card.back
+              return await synthesizeWithPiper(text, selectedVoice)
             } catch (error) {
               const cardNumber = cards.indexOf(card) + 1
               const message = getPiperErrorMessage(error)
@@ -178,6 +185,7 @@ export function HomePage() {
               })
             }
           },
+          audioField,
         } : {}),
         onProgress: setImportProgress,
       })
@@ -261,6 +269,7 @@ export function HomePage() {
           canImport={canImport}
           keepTextAfterImport={keepTextAfterImport}
           includeAudio={includeAudio}
+          audioField={audioField}
           piperStatus={piperStatus}
           piperMessage={piperMessage}
           piperVoices={piperVoices}
@@ -272,6 +281,7 @@ export function HomePage() {
           onImport={() => void handleImport()}
           onKeepTextChange={handleKeepTextChange}
           onIncludeAudioChange={handleIncludeAudioChange}
+          onAudioFieldChange={handleAudioFieldChange}
           onVoiceChange={handleVoiceChange}
           onPiperRefresh={() => void refreshPiper()}
         />
